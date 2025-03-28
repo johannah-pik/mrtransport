@@ -11,7 +11,7 @@
 #'
 #' @return a quitte object
 #'
-#' @importFrom rmndt magpie2dt
+#' @importFrom rmndt magpie2dt approx_dt
 #' @import data.table
 
 toolAdjustEnergyIntensity <- function(dt, regionTRACCS, TrendsEnIntPSI, filter, ariadneAdjustments = TRUE) {
@@ -135,8 +135,15 @@ toolAdjustEnergyIntensity <- function(dt, regionTRACCS, TrendsEnIntPSI, filter, 
   dt[, meanValue := mean(value, na.rm = TRUE), by = c("univocalName", "technology", "period")]
   dt[region %in% ISOcountriesMap[regionCode21 == "LAM"]$countryCode & univocalName %in% c("Compact Car") &
        technology == "Gases", value := meanValue]
-
   dt[, meanValue := NULL]
+
+
+  # 5: Changes in the energy intensity before 2005 affect the IEA harmonization in 2005 via the fleet calculation.
+  #    That is why we keep the energy intensity constant before 2005.
+  #    So the old vehicles in the fleet cannot lead to a deviation in the 2005 stock energy intensity.
+  xdata <- unique(dt$period)
+  dt <- dt[period >= 2005]
+  dt <- approx_dt(dt, xdata, "period", "value", extrapolate = TRUE)
 
   return(dt)
 }
