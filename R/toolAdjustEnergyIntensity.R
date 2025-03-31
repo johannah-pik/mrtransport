@@ -137,13 +137,10 @@ toolAdjustEnergyIntensity <- function(dt, regionTRACCS, TrendsEnIntPSI, filter, 
        technology == "Gases", value := meanValue]
   dt[, meanValue := NULL]
 
-
-  # 5: Changes in the energy intensity before 2005 affect the IEA harmonization in 2005 via the fleet calculation.
-  #    That is why we keep the energy intensity constant before 2005.
-  #    So the old vehicles in the fleet cannot lead to a deviation in the 2005 stock energy intensity.
+  # 5: data until 2005 is fixed to not impact changes in lifetime in the fleet calculation (in edgeT)
   xdata <- unique(dt$period)
   dt <- dt[period >= 2005]
-  dt <- approx_dt(dt, xdata, "period", "value", extrapolate = TRUE)
+  dt <- rmndt::approx_dt(dt, xdata, "period", "value",   extrapolate = TRUE)
 
   return(dt)
 }
