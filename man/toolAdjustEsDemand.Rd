@@ -4,7 +4,7 @@
 \alias{toolAdjustEsDemand}
 \title{Perform parameter specific adjustments on the input data}
 \usage{
-toolAdjustEsDemand(dt, mapIso2region, completeData, filter, data)
+toolAdjustEsDemand(dt, mapIso2region, completeData, filter, histSourceData)
 }
 \arguments{
 \item{dt}{calculated raw data without adjustments}
@@ -15,7 +15,7 @@ toolAdjustEsDemand(dt, mapIso2region, completeData, filter, data)
 
 \item{filter}{list of filters for specific branches in the upper decision tree, containing all associated}
 
-\item{data}{source data containing the annual mileage and load factor
+\item{histSourceData}{the full source data containing the annual mileage and load factor
 univocalNames}
 }
 \value{
