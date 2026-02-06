@@ -200,12 +200,12 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
 
-  dt[univocalName %in% carTypes & region == "CHN" & period == 2010, value := 2 * value]
-  dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 1.9 * value]
-  dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 1.8 * value]
-  dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 1.7 * value]
-  dt[univocalName %in% carTypes & region == "CHN" & period == 2006, value := 1.6 * value]
-  dt[univocalName %in% carTypes & region == "CHN" & period <= 2005, value := 1.5 * value]
+  dt[univocalName %in% carTypes & region == "CHN" , value := 3 * value]
+  # dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 1.9 * value]
+  # dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 1.8 * value]
+  # dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 1.7 * value]
+  # dt[univocalName %in% carTypes & region == "CHN" & period == 2006, value := 1.6 * value]
+  # dt[univocalName %in% carTypes & region == "CHN" & period <= 2005, value := 1.5 * value]
 
   ############ end of new CHA stuff from Robert
 
