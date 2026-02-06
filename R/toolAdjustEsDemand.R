@@ -65,7 +65,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
                                     region = "CHN",
                                     variable = "Share_in_Vehicles",
                                     unit = "Percent",
-                                    value = c(70,9,7,3,11))
+                                    value = c(74,5,5,3,13))
 
 
   # ## For debugging: first create safe-copy to later check if only the wanted rows are changed. Outcomment for debugging.
