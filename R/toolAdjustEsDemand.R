@@ -193,6 +193,20 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   # ]
   # dt_changed <- dt_diff[value_new != value_old]
 
+  ###### also adjust car ES demands upwards to better reflect car stock numbers in 2010 (~62 mio, eg IEA GEVO and others - see file in the owncloud
+  ## "Data/RegionalData/compiling_CHA_data_LDV.xlsx",
+  ## Simply increasing the ES values means that more cars are on the road, but also that 2010 FE demand BEFORE the IEA calibration is higher - thus preventing
+  ## the strong upscaling of energy intensities during the IEA FE calibration that was previously the case.
+
+  carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
+
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2010, value := 2 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 1.9 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 1.8 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 1.7 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2006, value := 1.6 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period <= 2005, value := 1.5 * value]
+
   ############ end of new CHA stuff from Robert
 
   dt[region %in% c("USA", "PRI", "UMI", "VIR"), value := ifelse(univocalName == "Truck (26t)",
