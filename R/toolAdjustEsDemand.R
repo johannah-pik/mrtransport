@@ -67,30 +67,41 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   # First step: define target vehicle shares by size:
   VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)","Truck (18t)","Truck (26t)","Truck (40t)","Truck (7_5t)"),
-                                    region = "CHN",
+                                    region = c(rep("CHN",5),rep("JPN",5)),
                                     variable = "Share_in_Vehicles",
                                     unit = "Percent",
-                                    value = c(78,4,3,2,13))
+                                    value = c( c(76, 5, 3, 3, 13), c(85,3,2,1,9)))
 
 
-  # ## For debugging: first create safe-copy to later check if only the wanted rows are changed. Outcomment for debugging.
-  dt_safecopy <- copy(dt)
 
   # extract existing ES totals for regions and trucks of interest
-  histESdemandCHA <- dt[region %in% c("CHN") & univocalName %like% "Truck"]
+  histESdemandtoUpdate <- dt[region %in% c("CHN","JPN") & univocalName %like% "Truck"]
 
-  histESdemandCHAold <- histESdemandCHA[    # drop variable and unit
-    , .(value = sum(value)),
+  histESdemandtoUpdateold <- histESdemandtoUpdate[    # drop variable and unit
+    , .(value = value),
     by = .(region, univocalName, technology, period )
   ]
 
-  histESdemandCHAoldSize <- histESdemandCHAold[
+  histESdemandtoUpdateoldTotal <- histESdemandtoUpdateold[
+    , .(totalES = sum(value)),
+    by = .(region, period)
+  ]
+
+  ## for Japan, truck sizes > 3.5 are completely missing from the input data. This makes the later rescaling impossible.
+  ## Therefore, I overwrite them with 1e-4 * min(totalES) to have a basis for rescaling, without changing totalES relevantly.
+  ## The "min" ensures that really the smallest ES value in any of the observed regions is used, to ensure minimal change of totalES
+  MinEsValuePerSize = 1e-4 * min(histESdemandtoUpdateoldTotal$totalES)
+  histESdemandtoUpdateold[ region == "JPN" & univocalName %in% c("Truck (18t)", "Truck (40t)", "Truck (7_5t)", "Truck (26t)") & technology == "Liquids",
+                           value := MinEsValuePerSize ]
+
+
+  histESdemandtoUpdateoldSize <- histESdemandtoUpdateold[
     , .(oldES = sum(value)),
     by = .(region, univocalName, period)
   ]
 
-  histESdemandCHAoldTotal <- histESdemandCHAold[
-    , .(total_ES = sum(value)),
+  histESdemandtoUpdateoldTotal <- histESdemandtoUpdateold[
+    , .(totalES = sum(value)),
     by = .(region, period)
   ]
 
@@ -99,15 +110,24 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ## First calculate total tkm per vehicle from annual mileage and load factors.
   ## Take the values for "Liquids", as that is the most common technology in 2010
 
-  annualTkmPerVehicle <- histSourceData$annualMileage[region %in% c("CHN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
-                                          .(annualMileage = value), by = .(region, univocalName)]
+  annualTkmPerVehicle <- histSourceData$annualMileage[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
+                                                      .(annualMileage = value), by = .(region, univocalName)]
 
-  annualTkmPerVehicle <- merge(annualTkmPerVehicle, histSourceData$loadFactor[region %in% c("CHN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
-                                                                    .(loadFactor = loadFactor), by = .(region, univocalName)],
+  annualTkmPerVehicle <- merge(annualTkmPerVehicle, histSourceData$loadFactor[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
+                                                                              .(loadFactor = loadFactor), by = .(region, univocalName)],
                                by = c("region", "univocalName"))
 
   annualTkmPerVehicle[, ESperVeh := annualMileage * loadFactor ]
 
+
+  # calculate old truck shares per vehicle size
+
+  VehicleOverview <- merge(annualTkmPerVehicle, histESdemandtoUpdateoldSize [period == 2010],
+                           by = c("region", "univocalName"))
+
+  VehicleOverview[, NumOfTrucks := oldES / ESperVeh ]
+  VehicleOverview[, TotalNumOfTrucks := sum(NumOfTrucks), , by = region]
+  VehicleOverview[, ShareOfTruckSize := NumOfTrucks / TotalNumOfTrucks * 100, by = region]
 
   ## calculate resulting ES values by size
   ESSharesTargetSize <- merge(VehSharesTargetSize, annualTkmPerVehicle, by = c("region", "univocalName") )
@@ -118,61 +138,72 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   ESSharesTargetSizeBack <- ESSharesTargetSize[ , .(univocalName = univocalName ,
                                                     region = region,
-                                                    variable = "TargetShareES",
-                                                    unit = "Percent",
-                                                    value = ESsharesNormalized * 100)
+                                                    ESshare = ESsharesNormalized)
   ]
 
   # calculate target ES per vehicle size with old ES totals
-  ## First create new DT with period x univocalname size, as SizeSharesTarget has no period, and histESdemandCHAoldTotal no size
+  ## First create new DT with period x univocalname size, as SizeSharesTarget has no period, and histESdemandtoUpdateoldTotal no size
 
-  histESdemandCHAtargetPerSize <- CJ(
-    period = histESdemandCHAoldTotal$period,
+  histESdemandtoUpdatetargetPerSize <- CJ(
+    period = histESdemandtoUpdateoldTotal$period,
     univocalName = ESSharesTargetSizeBack$univocalName,
     unique = TRUE
   )[
     ESSharesTargetSizeBack[, .(univocalName, ESshare = value / 100)],
-    on = "univocalName"
+    on = c("univocalName","region"),
+    allow.cartesian = TRUE
   ][
-    histESdemandCHAoldTotal,
-    on = "period"
+    histESdemandtoUpdateoldTotal,
+    on = "period",
+    allow.cartesian = TRUE
   ]
 
+  histESdemandtoUpdatetargetPerSize <- NULL
 
-  histESdemandCHAtargetPerSize[ , targetES := ESshare * total_ES ]
+  histESdemandtoUpdatetargetPerSize <- ESSharesTargetSizeBack[
+    histESdemandtoUpdateoldTotal,
+    on = "region",
+    allow.cartesian = TRUE
+  ]
+
+  histESdemandtoUpdatetargetPerSize[
+    , targetES := ESshare * totalES
+  ]
+
+  histESdemandtoUpdatetargetPerSize[ , targetES := ESshare * totalES ]
 
   ## calculate scaling factors for each size
-  ESscaling <- merge(histESdemandCHAoldSize, histESdemandCHAtargetPerSize, by = c("period", "univocalName", "region") )
+  ESscaling <- merge(histESdemandtoUpdateoldSize, histESdemandtoUpdatetargetPerSize, by = c("period", "univocalName", "region") )
 
   ESscaling[ , scaling := targetES / oldES ]
 
   ## rescale using old ES totals:
-  histESdemandCHAnewES <- merge(histESdemandCHAold, ESscaling, by = c("period", "univocalName", "region") )
+  histESdemandtoUpdatenewES <- merge(histESdemandtoUpdateold, ESscaling, by = c("period", "univocalName", "region") )
 
-  histESdemandCHAnewES[, value := value * scaling ]
+  histESdemandtoUpdatenewES[, value := value * scaling ]
 
   ## drop unused columns, add variable and unit
-  histESdemandCHAnewES[, c("oldES", "ESshare", "total_ES", "targetES", "scaling") := NULL][, ':='(variable = "ES", unit = "billion tkm/yr")]
+  histESdemandtoUpdatenewES[, c("oldES", "ESshare", "totalES", "targetES", "scaling") := NULL][, ':='(variable = "ES", unit = "billion tkm/yr")]
 
   ## check that the total new ES and the total old ES are unchanged:
 
-  setkey(histESdemandCHAnewES,region)
-  setkey(histESdemandCHAold,region)
+  setkey(histESdemandtoUpdatenewES,region)
+  setkey(histESdemandtoUpdateold,region)
 
   stopifnot(
     all.equal(
-      histESdemandCHAnewES[, sum(value), by = period],
-      histESdemandCHAold[, sum(value), by = period]
+      histESdemandtoUpdatenewES[, sum(value), by = .(period,region)],
+      histESdemandtoUpdateold[, sum(value), by = .(period,region)]
     )
   )
 
   ## update the original dt
-  ## the "value := i.value" formulation overwrites only the rows in dt that are contained in histESdemandCHAnewES, and keeps everyhting else unchanged:
+  ## the "value := i.value" formulation overwrites only the rows in dt that are contained in histESdemandtoUpdatenewES, and keeps everyhting else unchanged:
 
   joinCols <- c("region", "univocalName", "technology", "variable","unit", "period")
 
   dt[
-    histESdemandCHAnewES,
+    histESdemandtoUpdatenewES,
     on = joinCols,
     value := i.value
   ]
@@ -205,7 +236,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
 
-  dt[univocalName %in% carTypes & region == "CHN" , value := 3 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2010, value := 3 * value]
   dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 2.8 * value]
   dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 2.6 * value]
   dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 2.4 * value]
