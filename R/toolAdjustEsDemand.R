@@ -54,18 +54,23 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   ######## new China truck size adjustment from Robert
 
-  ## Adjustments on truck size classes in CHN region according to newer data.
-  ## This data is based on downscaled values from CEIC data, https://www.ceicdata.com/en/china/no-of-motor-vehicle/cn-no-of-motor-vehicle-truck-heavy
-  ## It is further split to EDGE-T size classes : 40t	5%, 26t	9%, 18t	11%, 7.5t	14%, 0-3.5 t 61%
+  ## Adjustments on truck size classes in CHN region according to newer data and model results
+  ## The new data is based on downscaled values from CEIC data, https://www.ceicdata.com/en/china/no-of-motor-vehicle/cn-no-of-motor-vehicle-truck-heavy
+  ## It is further split to EDGE-T size classes : 40t	5%, 26t	9%, 18t	11%, 7.5t	11%, 0-3.5 t 64%
   ## The original data and the further processing can be found in the transport folder in the owncloud:
   ## "Data/RegionalData/compiling_CHA_data_heavy_duty_vehicles.xlsx", cells V17:V21
+
+  ## However, the real-world split produces too low truck numbers when combined with the rest of the input data (total ES, enIntensity, loadFactor, ...)
+  ## Therefore, the following values are used, which are closer to the real-world values than the original data from GCAM, and still produce reasonable 2010/2015 truck numbers
+  ## 40t	2%, 26t	3%, 18t	4%, 7.5t	13%, 0-3.5 t 78%
+  ## When the rest of the input data is improved, this here should be changed to the real-world data as well.
 
   # First step: define target vehicle shares by size:
   VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)","Truck (18t)","Truck (26t)","Truck (40t)","Truck (7_5t)"),
                                     region = "CHN",
                                     variable = "Share_in_Vehicles",
                                     unit = "Percent",
-                                    value = c(74,5,5,3,13))
+                                    value = c(78,4,3,2,13))
 
 
   # ## For debugging: first create safe-copy to later check if only the wanted rows are changed. Outcomment for debugging.
@@ -201,11 +206,11 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
 
   dt[univocalName %in% carTypes & region == "CHN" , value := 3 * value]
-  # dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 1.9 * value]
-  # dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 1.8 * value]
-  # dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 1.7 * value]
-  # dt[univocalName %in% carTypes & region == "CHN" & period == 2006, value := 1.6 * value]
-  # dt[univocalName %in% carTypes & region == "CHN" & period <= 2005, value := 1.5 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2009, value := 2.8 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2008, value := 2.6 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2007, value := 2.4 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period == 2006, value := 2.2 * value]
+  dt[univocalName %in% carTypes & region == "CHN" & period <= 2005, value := 2   * value]
 
   ############ end of new CHA stuff from Robert
 
