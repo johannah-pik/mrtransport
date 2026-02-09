@@ -51,7 +51,6 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   dt[region %in% c("CHN", "HKG", "MAC") & univocalName == "Truck (18t)", value := value / 2,
      by = c("period", "region", "technology")]
 
-
   ######## new China truck size adjustment from Robert
 
   ## Adjustments on truck size classes in CHN region according to newer data and model results
@@ -142,23 +141,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ]
 
   # calculate target ES per vehicle size with old ES totals
-  ## First create new DT with period x univocalname size, as SizeSharesTarget has no period, and histESdemandtoUpdateoldTotal no size
-
-  histESdemandtoUpdatetargetPerSize <- CJ(
-    period = histESdemandtoUpdateoldTotal$period,
-    univocalName = ESSharesTargetSizeBack$univocalName,
-    unique = TRUE
-  )[
-    ESSharesTargetSizeBack[, .(univocalName, ESshare = value / 100)],
-    on = c("univocalName","region"),
-    allow.cartesian = TRUE
-  ][
-    histESdemandtoUpdateoldTotal,
-    on = "period",
-    allow.cartesian = TRUE
-  ]
-
-  histESdemandtoUpdatetargetPerSize <- NULL
+  ## First create new DT with period x univocalname size with the "allow.cartesian = TRUE, as SizeSharesTarget has no period, and histESdemandtoUpdateoldTotal no size
 
   histESdemandtoUpdatetargetPerSize <- ESSharesTargetSizeBack[
     histESdemandtoUpdateoldTotal,
