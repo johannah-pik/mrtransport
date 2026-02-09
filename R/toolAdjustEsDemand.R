@@ -51,9 +51,12 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   dt[region %in% c("CHN", "HKG", "MAC") & univocalName == "Truck (18t)", value := value / 2,
      by = c("period", "region", "technology")]
 
-  ######## new China truck size adjustment from Robert
-
+  ######## new historic truck size adjustment from Robert for CHN and JPN
   ## Adjustments on truck size classes in CHN region according to newer data and model results
+
+  ## when combining the input data ES values by size with the input data annualMileage and loadFactor, the following shares come out:
+  ## 40t 0.1%, 26t 0.4%, 18t 1.4%, 7.5t 3%, 0-3.5t 95%
+
   ## The new data is based on downscaled values from CEIC data, https://www.ceicdata.com/en/china/no-of-motor-vehicle/cn-no-of-motor-vehicle-truck-heavy
   ## It is further split to EDGE-T size classes : 40t	5%, 26t	9%, 18t	11%, 7.5t	11%, 0-3.5 t 64%
   ## The original data and the further processing can be found in the transport folder in the owncloud:
@@ -61,8 +64,13 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   ## However, the real-world split produces too low truck numbers when combined with the rest of the input data (total ES, enIntensity, loadFactor, ...)
   ## Therefore, the following values are used, which are closer to the real-world values than the original data from GCAM, and still produce reasonable 2010/2015 truck numbers
-  ## 40t	2%, 26t	3%, 18t	4%, 7.5t	13%, 0-3.5 t 78%
+  ## 40t 3%, 26t 3%, 18t 5%, 7.5t 13%, 0-3.5t 76%
   ## When the rest of the input data is improved, this here should be changed to the real-world data as well.
+
+  ## Also the truck size data for JPN is overwritten, as our input data for JPN shows 99.999% of 0-3.5t trucks, while recent real-world data shows relevant numbers of heavy-duty trucks.
+  ## "Data/RegionalData/compiling_JPN_data_heavy_duty_vehicles.xlsx"
+  ## At the moment, the current vehicle size shares are:  (to be changed in the future once other input data is adjusted)
+  ## 40t 3%, 26t 3%, 18t 5%, 7.5t 13%, 0-3.5t 76%
 
   # First step: define target vehicle shares by size:
   VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)","Truck (18t)","Truck (26t)","Truck (40t)","Truck (7_5t)"),
@@ -112,8 +120,10 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   annualTkmPerVehicle <- histSourceData$annualMileage[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
                                                       .(annualMileage = value), by = .(region, univocalName)]
 
-  annualTkmPerVehicle <- merge(annualTkmPerVehicle, histSourceData$loadFactor[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
-                                                                              .(loadFactor = loadFactor), by = .(region, univocalName)],
+  dtloadFactor <- histSourceData$loadFactor[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
+                                            .(loadFactor = loadFactor), by = .(region, univocalName)]
+
+  annualTkmPerVehicle <- merge(annualTkmPerVehicle, dtloadFactor,
                                by = c("region", "univocalName"))
 
   annualTkmPerVehicle[, ESperVeh := annualMileage * loadFactor ]
@@ -212,10 +222,12 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   # ]
   # dt_changed <- dt_diff[value_new != value_old]
 
-  ###### also adjust car ES demands upwards to better reflect car stock numbers in 2010 (~62 mio, eg IEA GEVO and others - see file in the owncloud
-  ## "Data/RegionalData/compiling_CHA_data_LDV.xlsx",
-  ## Simply increasing the ES values means that more cars are on the road, but also that 2010 FE demand BEFORE the IEA calibration is higher - thus preventing
+  ###### also adjust car ES demands upwards to better reflect car stock numbers in 2010 and 2015
+  ## (~62 mio in 2010, 140 mio in 2015 , eg IEA GEVO and others - see file in the owncloud "Data/RegionalData/compiling_CHA_data_LDV.xlsx",
+  ## Increasing the ES values means that more cars are on the road, but also that 2010 FE demand BEFORE the IEA calibration is higher - thus preventing
   ## the strong upscaling of energy intensities during the IEA FE calibration that was previously the case.
+  ## The multipliers are staggered (reducing from 2.5 in 2010 to 1.5 in 2005) to represent the fast growth of LDV numbers over these 5 years.
+  ## The 2.5 multiplier in 2010 is a compromise betwen hitting 2010 and 2015 numbers: 2010 85 mio instead of 62 mio, 2015 125 mio instead of 140 mio
 
   carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
 
