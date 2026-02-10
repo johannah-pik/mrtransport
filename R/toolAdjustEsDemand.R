@@ -37,23 +37,9 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   dt[univocalName == "Cycle" & value == 0 & regionCode21 %in% c("IND", "CHN"), value := demldv * 0.02]
   dt[, demldv := NULL]
 
-  #3: Correct demand for CHN
-  ## the category "truck > 14t" in China does most likely contain also heavy trucks
-  ## otherwise there are none
-  #plausibilityFix_CHN #plausibilityFix_Truck #plausibilityFix_Freight
-  dt[region %in% c("CHN", "HKG", "MAC"), value := ifelse(univocalName == "Truck (26t)",
-                                                         value[univocalName == "Truck (18t)"] / 4,
-                                                         value),
-     by = c("period", "region", "technology")]
-  dt[region %in% c("CHN", "HKG", "MAC"), value := ifelse(univocalName == "Truck (40t)",
-                                                         value[univocalName == "Truck (18t)"] / 4,
-                                                         value),
-     by = c("period", "region", "technology")]
-  dt[region %in% c("CHN", "HKG", "MAC") & univocalName == "Truck (18t)", value := value / 2,
-     by = c("period", "region", "technology")]
-
-  ######## new historic truck size adjustment from Robert for CHN and JPN
+  #3: Correct truck size ES splits for CHA and JPN
   #plausibilityFix_CHN #plausibilityFix_JPN #plausibilityFix_Truck #plausibilityFix_Freight
+
   ## Adjustments on truck size classes in CHN region according to newer data and model results
   ## Treat HKG and MAC like CHN, as we have no data on their specific size split
 
@@ -74,7 +60,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ## "Data/RegionalData/compiling_JPN_data_heavy_duty_vehicles.xlsx"
   ## At the moment, the current vehicle size shares are:  (to be changed in the future once other input data is adjusted)
   ## 40t 3%, 26t 3%, 18t 5%, 7.5t 13%, 0-3.5t 76%
-browser()
+
   # First step: define target vehicle shares by size:
   VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)", "Truck (18t)", "Truck (26t)", "Truck (40t)", "Truck (7_5t)"),
                                     region = c(rep("CHN", 5), rep("HKG", 5), rep("MAC", 5), rep("JPN", 5)),
@@ -102,6 +88,21 @@ browser()
   histESdemandtoUpdateold[ region == "JPN" & univocalName %in% c("Truck (18t)", "Truck (40t)", "Truck (7_5t)", "Truck (26t)") & technology == "Liquids",
                            value := MinEsValuePerSize ]
 
+  ## The same problem of zero-value entries holds true for CHA, but for CHA the technology split is more relevant,
+  ## as CHA has a relevant CNG truck fleet.
+  ## Therefore, the initialization is based on the technology split of 18t-trucks:
+
+  histESdemandtoUpdateold[region %in% c("CHN", "HKG", "MAC"), value := ifelse(univocalName == "Truck (26t)",
+                                                         value[univocalName == "Truck (18t)"] * 1e-4,
+                                                         value),
+     by = c("period", "region", "technology")]
+  histESdemandtoUpdateold[region %in% c("CHN", "HKG", "MAC"), value := ifelse(univocalName == "Truck (40t)",
+                                                         value[univocalName == "Truck (18t)"] * 1e-4,
+                                                         value),
+     by = c("period", "region", "technology")]
+
+
+  ## calculate totals by truck size and overall total truck ES
 
   histESdemandtoUpdateoldSize <- histESdemandtoUpdateold[
     , .(oldES = sum(value)),
@@ -130,7 +131,7 @@ browser()
   annualTkmPerVehicle[, ESperVeh := annualMileage * loadFactor ]
 
 
-  # calculate old truck shares per vehicle size
+  # calculate old truck shares per vehicle size as coming from the original input data
 
   VehicleOverview <- merge(annualTkmPerVehicle, histESdemandtoUpdateoldSize [period == 2010],
                            by = c("region", "univocalName"))
@@ -191,37 +192,13 @@ browser()
     )
   )
 
-  ## update the original dt
-  ## the "value := i.value" formulation overwrites only the rows in dt that are contained in histESdemandtoUpdatenewES, and keeps everyhting else unchanged:
 
-  joinCols <- c("region", "univocalName", "technology", "variable","unit", "period")
+  ## update the original dt - overwrite values for which there are new values in histESdemandtoUpdatenewES
+  setnames(histESdemandtoUpdatenewES, "value", "valueNew")
+  dt <- merge(dt, histESdemandtoUpdatenewES, by = intersect(names(dt), names(histESdemandtoUpdatenewES)), all.x = TRUE)
+  dt[!is.na(valueNew), value := valueNew][, valueNew := NULL]
 
-  dt[
-    histESdemandtoUpdatenewES,
-    on = joinCols,
-    value := i.value
-  ]
 
-  # ## For debugging: check which values were changed:
-  # # Outcomment for debugging.
-  #
-  # key_cols <- c("period", "region", "univocalName", "technology", "variable")
-  #
-  # dt_diff <- dt[
-  #   dt_safecopy,
-  #   on = key_cols,
-  #   nomatch = 0,
-  #   .(
-  #     period,
-  #     region,
-  #     univocalName,
-  #     technology,
-  #     variable,
-  #     value_new = value,
-  #     value_old = i.value
-  #   )
-  # ]
-  # dt_changed <- dt_diff[value_new != value_old]
 
   ###### also adjust car ES demands upwards to better reflect car stock numbers in 2010 and 2015
   ## (~62 mio in 2010, 140 mio in 2015 , eg IEA GEVO and others - see file in the owncloud "Data/RegionalData/compiling_CHA_data_LDV.xlsx",
