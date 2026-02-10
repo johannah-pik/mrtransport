@@ -40,6 +40,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   #3: Correct demand for CHN
   ## the category "truck > 14t" in China does most likely contain also heavy trucks
   ## otherwise there are none
+  #plausibilityFix_CHN #plausibilityFix_Truck #plausibilityFix_Freight
   dt[region %in% c("CHN", "HKG", "MAC"), value := ifelse(univocalName == "Truck (26t)",
                                                          value[univocalName == "Truck (18t)"] / 4,
                                                          value),
@@ -52,7 +53,9 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
      by = c("period", "region", "technology")]
 
   ######## new historic truck size adjustment from Robert for CHN and JPN
+  #plausibilityFix_CHN #plausibilityFix_JPN #plausibilityFix_Truck #plausibilityFix_Freight
   ## Adjustments on truck size classes in CHN region according to newer data and model results
+  ## Treat HKG and MAC like CHN, as we have no data on their specific size split
 
   ## when combining the input data ES values by size with the input data annualMileage and loadFactor, the following shares come out:
   ## 40t 0.1%, 26t 0.4%, 18t 1.4%, 7.5t 3%, 0-3.5t 95%
@@ -71,18 +74,16 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ## "Data/RegionalData/compiling_JPN_data_heavy_duty_vehicles.xlsx"
   ## At the moment, the current vehicle size shares are:  (to be changed in the future once other input data is adjusted)
   ## 40t 3%, 26t 3%, 18t 5%, 7.5t 13%, 0-3.5t 76%
-
+browser()
   # First step: define target vehicle shares by size:
-  VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)","Truck (18t)","Truck (26t)","Truck (40t)","Truck (7_5t)"),
-                                    region = c(rep("CHN",5),rep("JPN",5)),
+  VehSharesTargetSize <- data.table(univocalName = c("Truck (0-3_5t)", "Truck (18t)", "Truck (26t)", "Truck (40t)", "Truck (7_5t)"),
+                                    region = c(rep("CHN", 5), rep("HKG", 5), rep("MAC", 5), rep("JPN", 5)),
                                     variable = "Share_in_Vehicles",
                                     unit = "Percent",
-                                    value = c( c(76, 5, 3, 3, 13), c(88,1,1,1,9)))
-
-
+                                    value = c( rep(c(76, 5, 3, 3, 13), 3), c(88, 1, 1, 1, 9)))
 
   # extract existing ES totals for regions and trucks of interest
-  histESdemandtoUpdate <- dt[region %in% c("CHN","JPN") & univocalName %like% "Truck"]
+  histESdemandtoUpdate <- dt[region %in% c("CHN", "HKG", "MAC", "JPN") & univocalName %like% "Truck"]
 
   histESdemandtoUpdateold <- histESdemandtoUpdate[    # drop variable and unit
     , .(value = value),
@@ -117,10 +118,10 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ## First calculate total tkm per vehicle from annual mileage and load factors.
   ## Take the values for "Liquids", as that is the most common technology in 2010
 
-  annualTkmPerVehicle <- histSourceData$annualMileage[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
+  annualTkmPerVehicle <- histSourceData$annualMileage[region %in% c("CHN", "HKG", "MAC", "JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
                                                       .(annualMileage = value), by = .(region, univocalName)]
 
-  dtloadFactor <- histSourceData$loadFactor[region %in% c("CHN","JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
+  dtloadFactor <- histSourceData$loadFactor[region %in% c("CHN", "HKG", "MAC", "JPN") & univocalName %like% "Truck" & period == 2010 & technology == "Liquids",
                                             .(loadFactor = loadFactor), by = .(region, univocalName)]
 
   annualTkmPerVehicle <- merge(annualTkmPerVehicle, dtloadFactor,
@@ -228,6 +229,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   ## the strong upscaling of energy intensities during the IEA FE calibration that was previously the case.
   ## The multipliers are staggered (reducing from 2.5 in 2010 to 1.5 in 2005) to represent the fast growth of LDV numbers over these 5 years.
   ## The 2.5 multiplier in 2010 is a compromise betwen hitting 2010 and 2015 numbers: 2010 85 mio instead of 62 mio, 2015 125 mio instead of 140 mio
+  #plausibilityFix_CHN #plausibilityFix_LDV #plausibilityFix_Pass
 
   carTypes <- c("Compact Car", "Large Car", "Large Car and SUV", "Midsize Car", "Mini Car", "Subcompact Car","Van")
 
@@ -240,6 +242,7 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
 
   ############ end of new CHA stuff from Robert
 
+  #plausibilityFix_USA #plausibilityFix_Truck #plausibilityFix_Freight
   dt[region %in% c("USA", "PRI", "UMI", "VIR"), value := ifelse(univocalName == "Truck (26t)",
                                                                 value[univocalName == "Truck (18t)"] / 3,
                                                                 value),
@@ -251,25 +254,32 @@ toolAdjustEsDemand <- function(dt, mapIso2region, completeData, filter, histSour
   dt[region %in% c("USA", "PRI", "UMI", "VIR") & univocalName == "Truck (18t)", value := value / 3,
      by = c("period", "region", "technology")]
 
+
+  #plausibilityFix_CHN #plausibilityFix_Rail #plausibilityFix_Pass
   #from https://www.iea.org/reports/tracking-rail-2020-2
   dt[period <= 2010 & regionCode21 == "CHN" & univocalName == "HSR", value := 70000]
+
+  #plausibilityFix_CHN #plausibilityFix_Truck #plausibilityFix_Freight
   # from https://theicct.org/sites/default/files/China_Freight_Assessment_English_20181022.pdf
   # total road freight demand seems to be around 5 billion tkm * 0.8, a factor 3 roughly
   dt[period <= 2010 & regionCode21 == "CHN" & univocalName %in% filter$trn_freight_road, value := value * 3]
 
   #4: Demand level corrections, adjusting to ETP demands
+  #plausibilityFix_CHN #plausibilityFix_Bus #plausibilityFix_Pass   #plausibilityFix_IND #plausibilityFix_OAS #plausibilityFix_NEU #plausibilityFix_MEA
   dt[regionCode21 == "CHA" & univocalName == "Bus", value := value / 2.5]
   dt[regionCode21 == "IND" & univocalName == "Bus", value := value / 2]
   dt[regionCode21 == "OAS" & univocalName == "Bus", value := value / 5]
   dt[regionCode12 == "NEU" & univocalName == "Bus", value := value / 2]
   dt[regionCode21 == "MEA" & univocalName == "Bus", value := value / 2]
 
+  #plausibilityFix_DEU #plausibilityFix_Truck #plausibilityFix_Freight
   #5: Adjust GER Truck size shares according to KBA data (calculated from stocks via AM and LF)
   dt[region == "DEU" & univocalName == "Truck (0-3_5t)", value := value * 2]
   dt[region == "DEU" & univocalName == "Truck (7_5t)", value := value * 0.25]
   dt[region == "DEU" & univocalName == "Truck (18t)", value := value * 0.65]
   dt[region == "DEU" & univocalName == "Truck (40t)", value := value * 1.4]
 
+  #plausibilityFix_DEU #plausibilityFix_Truck #plausibilityFix_Freight
   #6: Total 2010 Freight demands, from ViZ 2010
   # (the shares are roughly OK)
   dt[region == "DEU" & univocalName %in% filter$trn_freight, value := value * 620 / 587]
