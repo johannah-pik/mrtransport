@@ -67,7 +67,7 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   # c) We do not have vintage tracking for the rest of the modes -> insert zeros
   # Later on it would be great to top up this data
   missingAnnualMileageData <- fread(
-                                    text = "univocalName, annualMileage
+              text = "univocalName, annualMileage
               International Aviation, 0
               Domestic Aviation, 0
               Passenger Rail, 0
