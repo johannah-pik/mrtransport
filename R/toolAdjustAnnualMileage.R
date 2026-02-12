@@ -36,6 +36,9 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   dt <- dt[!is.na(check)]
   # update variable and unit for introduced NAs
   dt[, unit := mileageUnit][, variable := "Annual mileage"][, check := NULL]
+  
+  dt[, value := ifelse(is.na(value), value[technology == "Liquids"], value),
+     by = c("period", "univocalName", "region")]
 
   dt[, value := ifelse(is.na(value), mean(value, na.rm = TRUE), value),
      by = c("period", "univocalName", "region")]
