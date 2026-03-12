@@ -1,0 +1,15 @@
+transportMode;subsectorL1;subsectorL2;subsectorL3
+Pass cars;trn_pass_road;trn_pass_road_LDV;trn_pass_road_LDV_4W
+Pass bus_coach;trn_pass_road;Bus;
+Pass tram and metro;Passenger Rail;;
+Pass rail_pkm;Passenger Rail;;
+Pass hs_rail_r;HSR;;
+Freight road_ter;trn_freight_road;;
+Freight rail_tkm;Freight Rail;;
+Freight iww;Domestic Ship;;
+stock_cars;trn_pass_road;trn_pass_road_LDV;trn_pass_road_LDV_4W
+stock_busses;trn_pass_road;Bus;
+stock_goods;trn_freight;trn_freight_road;
+car_reg_new;trn_pass_road;trn_pass_road_LDV;trn_pass_road_LDV_4W
+bus_reg;trn_pass_road;Bus;
+com_reg;trn_freight;trn_freight_road;
