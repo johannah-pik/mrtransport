@@ -27,12 +27,12 @@ readACEA <- function(subtype = c("historicalEnergyServiceDemand")) {
         read_excel("vehiclesOnEuropeanRoads.xlsx", 
                    sheet = "Trucks", 
                    range = "A4:F37")
-      )[, variable := "Stock|Transport|Freight|Road"]
+      )
       buses <- as.data.table(
         read_excel("vehiclesOnEuropeanRoads.xlsx", 
                    sheet = "Buses", 
                    range = "A4:F35")
-      )[, variable := "Stock|Transport|Pass|Road|Bus"]
+      )
       
       stock <- rbind(cars[, variable := "Stock|Transport|Pass|Road|LDV|Four Wheelers"], 
                      trucks[, variable := "Stock|Transport|Freight|Road"], 
@@ -41,10 +41,9 @@ readACEA <- function(subtype = c("historicalEnergyServiceDemand")) {
       measureVars <- names(stock)[!names(stock) %in% c("Country", "unit", "variable")]
       stock <- melt(stock, measure.vars = measureVars, variable.name = "period")
       setnames(stock, "Country", "region")
-      stock <- stock[, value := value * 10^-6][, unit := "million vehicles"]
+      stock <- stock[, value := value * 10^-6][, unit := "million veh"]
       setcolorder(stock, c("region", "period", "variable", "unit", "value"))
       stock <- stock[!region %in% c("EU-27", "EFTA")]
-      
       MP <- as.magpie(
         stock,
         spatial   = "region",     # region column
@@ -90,11 +89,11 @@ readACEA <- function(subtype = c("historicalEnergyServiceDemand")) {
                           trucks2024[, variable := "Stock|Transport|Freight|Road"], 
                           buses2023[, variable := "Stock|Transport|Pass|Road|Bus"], 
                           buses2024[, variable := "Stock|Transport|Pass|Road|Bus"])
-      techShares[, unit := "%"]
-      measureVars <- names(techShares)[!names(techShares) %in% c("Country", "unit", "period", "variable")]
+    
+      measureVars <- names(techShares)[!names(techShares) %in% c("Country", "period", "variable")]
       techShares <- melt(techShares, measure.vars = measureVars, variable.name = "technologyACEA")
       setnames(techShares, "Country", "region")
-      browser()
+      techShares[, value := as.numeric(as.character(value))][, unit := "%"]
       setcolorder(techShares, c("region", "period", "variable", "technologyACEA", "unit", "value"))
       techShares <- techShares[!region %in% c("EU-27", "EFTA")]
       
@@ -106,6 +105,6 @@ readACEA <- function(subtype = c("historicalEnergyServiceDemand")) {
       )
     }
   )
-  browser()
+
   return(MP)
 }

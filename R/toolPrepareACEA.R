@@ -11,13 +11,13 @@
 #' @importFrom rmndt magpie2dt
 
 toolPrepareACEA <- function(x) {
-  
+
   dataTable <- magpie2dt(x)
   mapfile <- system.file("extdata", "mappingACEAToEDGET.csv", package = "mrtransport", mustWork = TRUE)
   mapping <- fread(mapfile, skip = 0)
   mappedData <- merge(dataTable, mapping, by = "technologyACEA")
-  mappedData <- mappedData[!value == "-"]
-  mappedData <- mappedData[, .(value = sum(value)), by = c("region", "period", "variable", "unit", "subsectorL1", "subsectorL2", "subsectorL3")]
+  mappedData <- mappedData[!technology == ""]
+  mappedData <- mappedData[, .(value = sum(value)), by = c("region", "period", "variable", "unit", "technology")]
   
   return(mappedData)
 }

@@ -11,12 +11,13 @@
 #' @importFrom rmndt magpie2dt
 
 toolPrepareEuropeanAlternativeFuelsObservatory <- function(x) {
-  
+
   dataTable <- magpie2dt(x)
   mapfile <- system.file("extdata", "mappingEUAFOtoEDGET.csv", package = "mrtransport", mustWork = TRUE)
   mapping <- fread(mapfile, skip = 0)
   mappedData <- merge(dataTable, mapping, by = "technologyEUAFO")
   mappedData <- mappedData[!value == ""]
+  mappedData <- mappedData[!technology == ""]
   mappedData <- mappedData[, .(value = sum(value)), by = c("region", "period", "variable", "technology", "unit")]
   
   return(mappedData)

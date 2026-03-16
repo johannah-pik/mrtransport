@@ -109,7 +109,7 @@ readEUstatisticalPocketbook <- function(subtype = c("historicalEnergyServiceDema
         # The 2017 value for GE is erroneous (there is just an ":") in the excel data source
         if (i == 2) vehicleData[region == "GE", "2017" := NA]
         vehicleData <- melt(vehicleData, measure.vars = measureVars, variable.name = "period")
-        vehicleData <- vehicleData[!is.na(value), value := as.double(value) * 10^-3][, unit := "million vehicles"]
+        vehicleData <- vehicleData[!is.na(value), value := as.double(value) * 10^-3][, unit := "million veh"]
         
         vehicleData[, transportMode := sheets[i]]
         vehicleData[, `:=`(
@@ -148,7 +148,7 @@ readEUstatisticalPocketbook <- function(subtype = c("historicalEnergyServiceDema
       newCarRegistrations <- newCarRegistrations[!is.na(region)][, unit := "thousand vehicles"]
       measureVars <- names(newCarRegistrations)[!names(newCarRegistrations) %in% c("region", "unit")]
       newCarRegistrations <- melt(newCarRegistrations, measure.vars = measureVars, variable.name = "period")
-      newCarRegistrations <- newCarRegistrations[, value := value * 10^-3][, unit := "million vehicles"]
+      newCarRegistrations <- newCarRegistrations[, value := value * 10^-3][, unit := "million veh"]
       newCarRegistrations[, transportMode := "car_reg_new"]
       
       newBusRegistrations <- as.data.table(
@@ -162,7 +162,7 @@ readEUstatisticalPocketbook <- function(subtype = c("historicalEnergyServiceDema
       newBusRegistrations <- newBusRegistrations[!is.na(region)][, unit := "thousand vehicles"]
       measureVars <- names(newBusRegistrations)[!names(newBusRegistrations) %in% c("region", "unit")]
       newBusRegistrations <- melt(newBusRegistrations, measure.vars = measureVars, variable.name = "period")
-      newBusRegistrations <- newBusRegistrations[, value := value * 10^-3][, unit := "million vehicles"]
+      newBusRegistrations <- newBusRegistrations[, value := value * 10^-3][, unit := "million veh"]
       newBusRegistrations[, transportMode := "bus_reg"]
       
       newTruckRegistrations <- as.data.table(
@@ -177,7 +177,7 @@ readEUstatisticalPocketbook <- function(subtype = c("historicalEnergyServiceDema
       newTruckRegistrations <- newTruckRegistrations[!is.na(region)][, unit := "thousand vehicles"]
       measureVars <- names(newTruckRegistrations)[!names(newTruckRegistrations) %in% c("region", "unit")]
       newTruckRegistrations <- melt(newTruckRegistrations, measure.vars = measureVars, variable.name = "period")
-      newTruckRegistrations <- newTruckRegistrations[!is.na(value), value := as.numeric(value) * 10^-3][, unit := "million vehicles"]
+      newTruckRegistrations <- newTruckRegistrations[!is.na(value), value := as.numeric(value) * 10^-3][, unit := "million veh"]
       newTruckRegistrations[, transportMode := "com_reg"]
       
       newRegistrations <- rbind(newCarRegistrations, newTruckRegistrations, newBusRegistrations) 

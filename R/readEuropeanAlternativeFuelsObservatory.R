@@ -21,14 +21,14 @@ readEuropeanAlternativeFuelsObservatory <- function(subtype = c("historicalVehSt
       carsTechShares <- as.data.table(
         read_excel("alternativeFuelCarShares.xlsx", 
                    sheet = "AF cars fleet share", 
-                   range = "A4:F37")
+                   range = "A5:F37")
       )[, period := 2024][, unit := "%"][, variable := "vehicle stock share"]
       
-      measureVars <- names(carsTechShares)[!names(carsTechShares) %in% c("Country", "unit")]
+      measureVars <- names(carsTechShares)[!names(carsTechShares) %in% c("Country", "variable", "unit", "period")]
       carsTechShares <- melt(carsTechShares, measure.vars = measureVars, variable.name = "technologyEUAFO")
       setnames(carsTechShares, "Country", "region")
-      
-      setcolorder(carsTechShares, c("region", "period", "variable", "unit", "value"))
+      carsTechShares[, value := as.numeric(as.character(value))]
+      setcolorder(carsTechShares, c("region", "period", "variable", "technologyEUAFO", "unit", "value"))
       
       MP <- as.magpie(
         carsTechShares,
@@ -41,14 +41,14 @@ readEuropeanAlternativeFuelsObservatory <- function(subtype = c("historicalVehSt
       carsTechShares <- as.data.table(
         read_excel("alternativeFuelCarShares.xlsx", 
                    sheet = "AF cars sales share", 
-                   range = "A4:F37")
+                   range = "A5:F37")
       )[, period := 2025][, unit := "%"][, variable := "vehicle sales share"]
       
-      measureVars <- names(carsTechShares)[!names(carsTechShares) %in% c("Country", "unit")]
+      measureVars <- names(carsTechShares)[!names(carsTechShares) %in% c("Country", "variable", "unit", "period")]
       carsTechShares <- melt(carsTechShares, measure.vars = measureVars, variable.name = "technologyEUAFO")
       setnames(carsTechShares, "Country", "region")
-      
-      setcolorder(carsTechShares, c("region", "period", "variable", "unit", "value"))
+      carsTechShares[, value := as.numeric(as.character(value))]
+      setcolorder(carsTechShares, c("region", "period", "variable", "technologyEUAFO", "unit", "value"))
       
       MP <- as.magpie(
         carsTechShares,
