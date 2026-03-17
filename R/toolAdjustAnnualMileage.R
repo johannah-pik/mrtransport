@@ -13,13 +13,20 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   region <- value <- univocalName <- check <- unit <- variable <- annualMileage <- period <- technology <- meanValue <-
     regionCode21 <- . <- NULL
 
+  ISOcountriesMap <- system.file("extdata", "regionmappingISOto21to12.csv", package = "mrtransport", mustWork = TRUE)
+  ISOcountriesMap <- fread(ISOcountriesMap, skip = 0)
+  
   # 1: Adjustments made by Alois in consequence of the ARIADNE model intercomparison in 2022: Applying a factor of 0.9
   #    according to ViZ data from 2020 there has been a 10% reduction wrt 2010 values
   #    (from 14 kkm to 13.6 kkm per vehicle and year)
-  # 2: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026: Changing the factor to 0.8, because we are underestimating the vehicle stock
+  # 2: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026: 
+  #    Removing the factor, because we are overestimating the vehicle stock in 2005 but meet the energy service demand exactly
+  #    Introducing an annual mileage reduction due to the covid pandemic (only in DEU for now) to match rising vehicle stock reported by EU pocketbook data even with demand dip
   if (ariadneAdjustments) {
-    
-    dt[region == "DEU" & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
+    dt[period == 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.7]
+    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.75]
+    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.8]
+    dt[period == 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
   }
   # 2: Assume missing data
   # a) Some modes and technologies are missing an annual mileage
@@ -38,8 +45,9 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   dt <- dt[!is.na(check)]
   # update variable and unit for introduced NAs
   dt[, unit := mileageUnit][, variable := "Annual mileage"][, check := NULL]
-  
-  dt[, value := ifelse(is.na(value), value[technology == "Liquids"], value),
+  # By averaging the annual mileage over gases and liquids vehicles to fill gaps for BEVs, BEVs get a higher annual mileage than the ICE cars
+  # Fixing that only for DEU results for now
+  dt[region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode, value := ifelse(is.na(value), value[technology == "Liquids"], value),
      by = c("period", "univocalName", "region")]
 
   dt[, value := ifelse(is.na(value), mean(value, na.rm = TRUE), value),
@@ -57,7 +65,7 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   # b) Annual Mileage for Trucks is missing completely - insert assumptions made by Alois in 2022
   # (probably from ARIADNE)
   annualMileageTrucks <- fread(
-                               text = "univocalName, annualMileage
+      text = "univocalName, annualMileage
               Truck (0-3_5t), 21500
               Truck (7_5t), 34500
               Truck (18t), 53000
@@ -82,8 +90,6 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
 
   # 3 adjustments for scenarioMIP validation
   # a) adjust outliers to global mean
-  ISOcountriesMap <- system.file("extdata", "regionmappingISOto21to12.csv", package = "mrtransport", mustWork = TRUE)
-  ISOcountriesMap <- fread(ISOcountriesMap, skip = 0)
   dt[, meanValue := mean(value, na.rm = TRUE), by = c("univocalName", "technology", "period")]
   dt[region %in% ISOcountriesMap[regionCode21 %in% c("NES", "CHA")]$countryCode &
        univocalName %in% filter$trn_pass_road_LDV_4W, value := meanValue]
