@@ -13,10 +13,12 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   region <- value <- univocalName <- check <- unit <- variable <- annualMileage <- period <- technology <- meanValue <-
     regionCode21 <- . <- NULL
 
-  # 1: Adjustments made by Alois in consequence of the ARIADNE model intercomparison in 2022
+  # 1: Adjustments made by Alois in consequence of the ARIADNE model intercomparison in 2022: Applying a factor of 0.9
+  #    according to ViZ data from 2020 there has been a 10% reduction wrt 2010 values
+  #    (from 14 kkm to 13.6 kkm per vehicle and year)
+  # 2: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026: Changing the factor to 0.8, because we are underestimating the vehicle stock
   if (ariadneAdjustments) {
-    ## according to ViZ data from 2020 there has been a 10% reduction wrt 2010 values
-    ## (from 14 kkm to 13.6 kkm per vehicle and year)
+    
     dt[region == "DEU" & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
   }
   # 2: Assume missing data
