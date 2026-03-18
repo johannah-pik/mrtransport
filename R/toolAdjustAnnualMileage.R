@@ -22,9 +22,10 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   # 2: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026: 
   #    Removing the factor, because we are overestimating the vehicle stock in 2005 but meet the energy service demand exactly
   #    Introducing an annual mileage reduction due to the covid pandemic for EUR countries to match rising vehicle stock reported by EU pocketbook data even with demand dip
-  #    source: Odyssee-Mure
-  #    "The average distance travelled by car has increased between 2021 and 2023 (+3%/year at EU level) after a sharp decrease in 2020 in most countries (-13% at EU level). 
-  #    In 2023, it was still under its 2019 level (-4% for the EU)."
+  #    source that documents annual mileage dip due to covid-pandemic: Odyssee-Mure
+  #    "after a sharp decrease in 2020 in most countries (-13% at EU level)" 
+  #    For now we do not assume a mileage recovery in the years after 2020 (as reported by Odyssee-Mure), because we do no cover the demand dynamics yet (increases again after 2022).
+  #    To get closer to the reported vehicle stock increase (EU pocket book data) we keep the annual mileage reduction
   if (ariadneAdjustments) {
     dt[period >= 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
   }
