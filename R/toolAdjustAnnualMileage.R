@@ -23,11 +23,10 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   #    Removing the factor, because we are overestimating the vehicle stock in 2005 but meet the energy service demand exactly
   #    Introducing an annual mileage reduction due to the covid pandemic (only in DEU for now) to match rising vehicle stock reported by EU pocketbook data even with demand dip
   if (ariadneAdjustments) {
-    dt[period == 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.5]
-    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.6]
-    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.7]
-    dt[period == 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.8]
-    dt[period == 2024 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
+    dt[period == 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
+    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
+    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.93]
+    dt[period >= 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.96]
   }
   # 2: Assume missing data
   # a) Some modes and technologies are missing an annual mileage
@@ -107,7 +106,6 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
 
   # c) In the scenarioMIP validation we decided to only use constant annual mileage values
   # until we have better data (this makes 3b obsolete)
-  dt <- dt[, value := value[period == 2030], by = setdiff(names(dt), c("value", "period"))]
-
+  dt <- dt[period >= 2030, value := value[period == 2030], by = setdiff(names(dt), c("value", "period"))]
   return(dt)
 }
