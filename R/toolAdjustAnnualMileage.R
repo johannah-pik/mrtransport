@@ -26,10 +26,7 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   #    "The average distance travelled by car has increased between 2021 and 2023 (+3%/year at EU level) after a sharp decrease in 2020 in most countries (-13% at EU level). 
   #    In 2023, it was still under its 2019 level (-4% for the EU)."
   if (ariadneAdjustments) {
-    dt[period == 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
-    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.88]
-    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.89]
-    dt[period >= 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
+    dt[period >= 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
   }
   # 2: Assume missing data
   # a) Some modes and technologies are missing an annual mileage
