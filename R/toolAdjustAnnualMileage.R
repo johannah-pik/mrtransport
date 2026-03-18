@@ -27,9 +27,9 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   #    In 2023, it was still under its 2019 level (-4% for the EU)."
   if (ariadneAdjustments) {
     dt[period == 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
-    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
-    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.93]
-    dt[period >= 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.96]
+    dt[period == 2021 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.88]
+    dt[period == 2022 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.89]
+    dt[period >= 2023 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.9]
   }
   # 2: Assume missing data
   # a) Some modes and technologies are missing an annual mileage
