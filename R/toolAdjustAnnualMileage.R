@@ -15,16 +15,12 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
 
   ISOcountriesMap <- system.file("extdata", "regionmappingISOto21to12.csv", package = "mrtransport", mustWork = TRUE)
   ISOcountriesMap <- fread(ISOcountriesMap, skip = 0)
-  
-  # 1: Adjustments made by Alois in consequence of the ARIADNE model intercomparison in 2022: Applying a factor of 0.9
-  #    according to ViZ data from 2020 there has been a 10% reduction wrt 2010 values
-  #    (from 14 kkm to 13.6 kkm per vehicle and year)
-  # 2: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026: 
-  #    Removing the factor, because we are overestimating the vehicle stock in 2005 but meet the energy service demand exactly
-  #    Introducing an annual mileage reduction due to the covid pandemic for EUR countries to match rising vehicle stock reported by EU pocketbook data even with demand dip
-  #    source that documents annual mileage dip due to covid-pandemic: Odyssee-Mure
-  #    "after a sharp decrease in 2020 in most countries (-13% at EU level)" 
-  #    For now we do not assume a mileage recovery in the years after 2020 (as reported by Odyssee-Mure), because we do no cover the demand dynamics yet (increases again after 2022).
+
+  # 1: Adjustments made by Johanna in consequence of the ARIADNE model intercomparison in 2026:
+  #    Introducing an annual mileage reduction due to the covid pandemic for EUR countries to match rising vehicle stock reported by EU pocketbook data even with demand dip.
+  #    source that documents annual mileage dip due to covid-pandemic: Odyssee-Mure "after a sharp decrease in 2020 in most countries (-13% at EU level)"
+  #    For now we do not assume a mileage recovery in the years after 2020 (as reported by Odyssee-Mure), because we do no cover the energy service demand
+  #    dynamics yet sufficiently (increases again after 2022).
   #    To get closer to the reported vehicle stock increase (EU pocket book data) we keep the annual mileage reduction
   if (ariadneAdjustments) {
     dt[period >= 2020 & region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode & univocalName %in% filter$trn_pass_road_LDV_4W, value := value * 0.87]
@@ -105,8 +101,7 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   dt <- dt[period == 1990 | period > 2010]
   dt <- rmndt::approx_dt(dt, xdata, "period", "value")
 
-  # c) In the scenarioMIP validation we decided to only use constant annual mileage values
-  # until we have better data (this makes 3b obsolete)
+  # c) Until we have better data, we keep the values konstant after 2030
   dt <- dt[period >= 2030, value := value[period == 2030], by = setdiff(names(dt), c("value", "period"))]
   return(dt)
 }
