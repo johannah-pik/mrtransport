@@ -43,7 +43,7 @@ toolAdjustAnnualMileage <- function(dt, completeData, filter, ariadneAdjustments
   # update variable and unit for introduced NAs
   dt[, unit := mileageUnit][, variable := "Annual mileage"][, check := NULL]
   # By averaging the annual mileage over gases and liquids vehicles to fill gaps for BEVs, BEVs get a higher annual mileage than the ICE cars
-  # Fixing that only for DEU results for now
+  # Fixing that only for EUR countries for now
   dt[region %in% ISOcountriesMap[regionCode12 == "EUR"]$countryCode, value := ifelse(is.na(value), value[technology == "Liquids"], value),
      by = c("period", "univocalName", "region")]
 
