@@ -7,7 +7,8 @@
 calcEdgeTransportSAinputs(subtype, SSPscen = "SSP2", IEAharm = TRUE)
 }
 \arguments{
-\item{subtype}{one of the parameters required for EDGE-T SA}
+\item{subtype}{one of the parameters required for EDGE-T SA: "energyIntensity", "annualMileage", "histESdemand", "loadFactor", "CAPEXtrackedFleet",
+"nonFuelOPEXtrackedFleet", "CAPEXother", "nonFuelOPEXother", "speedOfModes", "valueOfTimeMultiplier", "timeValueCosts", "PurchasePriceSubsidies"}
 
 \item{SSPscen}{shared socioeconomic pathway}
 

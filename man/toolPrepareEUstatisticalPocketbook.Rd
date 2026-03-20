@@ -8,8 +8,6 @@ toolPrepareEUstatisticalPocketbook(x)
 }
 \arguments{
 \item{x}{the input data read via readSource, a magpie object}
-
-\item{subtype}{one of the different EDGE-T inputdata subtypes}
 }
 \value{
 a quitte object

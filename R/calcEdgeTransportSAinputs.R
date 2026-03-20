@@ -1,6 +1,7 @@
 #' Provide EDGE-Transport input parameters
 #' @author Johanna Hoppe
-#' @param subtype one of the parameters required for EDGE-T SA
+#' @param subtype one of the parameters required for EDGE-T SA: "energyIntensity", "annualMileage", "histESdemand", "loadFactor", "CAPEXtrackedFleet",
+#' "nonFuelOPEXtrackedFleet", "CAPEXother", "nonFuelOPEXother", "speedOfModes", "valueOfTimeMultiplier", "timeValueCosts", "PurchasePriceSubsidies"
 #' @param IEAharm switch IEA harmonization of energy intensity on and off
 #' @param SSPscen shared socioeconomic pathway
 #' @import data.table
@@ -963,16 +964,6 @@ calcEdgeTransportSAinputs <- function(subtype, SSPscen = "SSP2", IEAharm = TRUE)
         stop("Purchase price subsidies data includes NAs")
       }
 
-      quitteobj <- data
-
-    },
-    "LDVfleet" = {
-      unit <- "Mio veh"
-      description <- "historical LDV fleet of Eurostat countries, 4W only"
-      weight <- NULL
-
-      data <- readSource("EurostatEnergyCountryDataSheets", "LDVfleet")
-      data <- magpie2dt(data)
       quitteobj <- data
 
     }

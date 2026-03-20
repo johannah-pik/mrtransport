@@ -8,9 +8,7 @@
 toolPrepareEuropeanAlternativeFuelsObservatory(x)
 }
 \arguments{
-\item{x}{the input data read via readSource, a magpie object}
-
-\item{subtype}{one of the different EDGE-T inputdata subtypes}
+\item{x}{the input data read via readSource, a magpie objec}
 }
 \value{
 a quitte object

@@ -4,16 +4,16 @@
 #'
 #' @author Johanna Hoppe
 #' @param x the input data read via readSource, a magpie object
+#' @param subtype One of the possible subtypes
 #' @return a quitte object
 
 #' @import data.table
 #' @importFrom rmndt magpie2dt
 #' @export
 
-toolPrepareJRC <- function(x) {
+toolPrepareJRC <- function(x, subtype = c("energyServiceDemand", "energyServiceDemandTechnologyLevel")) {
   region <- JRCtechnology <- JRCtransportMode <- period <-
-    technology <- subsectorL3 <- variable <- unit <- period <- NULL
-
+    technology <- subsectorL3 <- variable <- unit <- period <- value <- . <- NULL
 
   if (subtype == "energyServiceDemand") {
     mapping <- fread(system.file("extdata", "mappingJRCtoEDGET.csv", package = "mrtransport", mustWork = TRUE))

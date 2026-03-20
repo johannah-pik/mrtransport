@@ -7,7 +7,7 @@
 calcAdditionalTransportSources(subtype, FiveYearAverage = TRUE)
 }
 \arguments{
-\item{subtype}{one of the source parameters}
+\item{subtype}{one of the source parameters: "energyServiceDemand", "vehicleStock", "vehicleSales", "vehicleStockTechShares", "vehicleSalesTechShares"}
 
 \item{FiveYearAverage}{switch to enable smoothing by calculating centered 5 years avergage}
 }

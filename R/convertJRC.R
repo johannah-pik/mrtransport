@@ -1,18 +1,17 @@
 #' Convert Eurostat road transportation data to iso country.
 #'
 #' @param x a magpie data object
-#' @param subtype One of the possible subtypes, see default argument.
 #' @return magpie object
 #'
 #' @examples
 #' \dontrun{
-#' a <- readSource("Eurostat")
+#' a <- readSource("JRC")
 #' }
 #' @author Johanna Hoppe
 #' @seealso [madrat::readSource()]
 #' @importFrom magclass getItems getSets getItems<- getSets<-
 
-convertJRC <- function(x, subtype) {
+convertJRC <- function(x) {
   getItems(x, dim = 1) <- toolCountry2isocode(getItems(x, dim = 1), mapping = c("EL" = "GRC"))
   getSets(x)["d1.1"] <- "region"
   #Convert million pkm to billion pkm
