@@ -57,7 +57,7 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
       energyServiceDemandJRCTech[subsectorL3 == "Bus_tmp_subsector_L3", variable := paste0("ES|Transport|Pass|Road|Bus|", technology)]
 
       energyServiceDemand <- rbind(energyServiceDemandJRC[, c("subsectorL3") := NULL], energyServiceDemandJRCTech[, c("subsectorL3", "technology") := NULL])
-      setcolorder(energyServiceDemand, c("region", "period", "variable", "unit", "value"))
+      setcolorder(energyServiceDemand, c("region", "period", "scenario", "model", "variable", "unit", "value"))
       quitteobj <- energyServiceDemand
     },
     "vehicleStock" = {
@@ -133,7 +133,7 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
   if (FiveYearAverage) {
     # Smoothing data by calculating centered 5 year average
     quitteobjAverage <- approx_dt(quitteobj, c(1965:1:2030), "period", "value",
-                                c("scenario", "model", "region", "variable", "unit"), extrapolate = TRUE)
+                                c("region", "scenario", "model", "variable", "unit"), extrapolate = TRUE)
     setorder(quitteobjAverage, scenario, model, region, variable, unit, period)
 
     quitteobjAverage[, avg5ycentered := frollmean(value, n = 5, align = "center"),
@@ -144,16 +144,21 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
     setnames(quitteobj, "avg5ycentered", "value")
   }
 
-  browser()
-  quitteobj
-  x <- as.magpie(as.data.frame(quitteobj))
+  # Aland islands is not reported by JRC, but needed for ENC regional aggregation, fill with zeros as the additional demand is little
+  ALA <- quitteobj[region == "DEU"]
+  Ala[, value := 0][, region := "ALA"]
+  quitteobj <- rbind(quitteobj, ALA)
+
+  x <- as.magpie(as.data.frame(quitteobj),
+                 spatial   = "region",     # region column
+                 temporal  = "period",     # years
+                 datacol   = "value" )     # numeric values
   x <- suppressMessages(toolCountryFill(x, fill = NA))
 
   return(list(
     x           = x,
     weight      = weight,
     unit        = unit,
-    description = description,
-    aggregationFunction = "toolAggregateVehicleTypes"
+    description = description
   ))
 }
