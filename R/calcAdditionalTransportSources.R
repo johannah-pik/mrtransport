@@ -13,7 +13,7 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
       unit <- "billion (p|t)km/yr"
       description <- "Ernergy service demand for different transport modes provided by EU pocketbook data"
       weight <- NULL
-      browser()
+
       energyServiceDemandEUpocketbook <- toolPrepareEUstatisticalPocketbook(readSource("EUstatisticalPocketbook", "historicalEnergyServiceDemand"))
       energyServiceDemandEUpocketbook[, scenario := "historical"][, model := "EUpocketbook"]
       energyServiceDemandEUpocketbook[subsectorL3 == "trn_pass_road_LDV_4W", variable := "ES|Transport|Pass|Road|LDV|Four Wheelers"]
@@ -25,7 +25,7 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
       energyServiceDemandEUpocketbook[subsectorL1 ==  "Domestic Ship", variable := "ES|Transport|Freight|Domestic Shipping"]
       energyServiceDemandEUpocketbook[, c("subsectorL1", "subsectorL2", "subsectorL3") := NULL]
 
-      energyServiceDemandJRC <- toolPrepareEUstatisticalPocketbook(readSource("JRC", "energyServiceDemand"))[, scenario := "historical"][, model := "JRC"]
+      energyServiceDemandJRC <- toolPrepareJRC(readSource("JRC", "energyServiceDemand"), "energyServiceDemand")[, scenario := "historical"][, model := "JRC"]
       energyServiceDemandJRC[subsectorL3 == "trn_pass_road_LDV_4W", variable := "ES|Transport|Pass|Road|LDV|Four Wheelers"]
       energyServiceDemandJRC[subsectorL3 == "trn_pass_road_LDV_2W", variable := "ES|Transport|Pass|Road|LDV|Two Wheelers"]
       energyServiceDemandJRC[subsectorL3 == "Bus_tmp_subsector_L3", variable := "ES|Transport|Pass|Road|Bus"]
@@ -39,20 +39,26 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
       energyServiceDemandJRC[subsectorL3 ==  "International Ship_tmp_subsector_L3", variable := "ES|Transport|Bunkers|Freight|Shipping"]
 
       #aggregate data to small-medium distance top nodes
-      energyServiceDemandPassSMD <- energyServiceDemandJRC[subsector %in% c("trn_pass_road_LDV_4W", "trn_pass_road_LDV_2W", "Bus_tmp_subsector_L3",
+      energyServiceDemandPassSMD <- energyServiceDemandJRC[subsectorL3 %in% c("trn_pass_road_LDV_4W", "trn_pass_road_LDV_2W", "Bus_tmp_subsector_L3",
                                                                             "HSR_tmp_subsector_L3", "Domestic Aviation_tmp_subsector_L3", "Passenger Rail_tmp_subsector_L3"),
-                                                           .(value = sum(value)), by = c("region", "period", "variable", "unit", "value")][, variable := "ES|Transport|Pass|w/o bunkers"]
-      energyServiceDemandFreightSMD <- energyServiceDemandJRC[subsector %in% c("trn_freight_road_tmp_subsector_L3", "Freight Rail_tmp_subsector_L3", "Bus_tmp_subsector_L3",
+                                                           .(value = sum(value)), by = c("region", "period", "unit", "value")][, variable := "ES|Transport edge|Pass"]
+      energyServiceDemandFreightSMD <- energyServiceDemandJRC[subsectorL3 %in% c("trn_freight_road_tmp_subsector_L3", "Freight Rail_tmp_subsector_L3", "Bus_tmp_subsector_L3",
                                                                             "HSR_tmp_subsector_L3", "Domestic Aviation_tmp_subsector_L3", "Domestic Ship_tmp_subsector_L3"),
-                                                           .(value = sum(value)), by = c("region", "period", "variable", "unit", "value")][, variable := "ES|Transport|Freight|w/o bunkers"]
+                                                           .(value = sum(value)), by = c("region", "period", "unit", "value")][, variable := "ES|Transport edge|Freight"]
 
-      energyServiceDemandJRCTech <- toolPrepareEUstatisticalPocketbook(readSource("JRC", "energyServiceDemandTechnologyLevel"))[, scenario := "historical"][, model := "JRC"]
+      energyServiceDemandJRCTech <- toolPrepareJRC(readSource("JRC", "energyServiceDemandTechnologyLevel"), "energyServiceDemandTechnologyLevel")[, scenario := "historical"][, model := "JRC"]
       #check whether data sums up
+      summationCheck <- energyServiceDemandJRCTech[, .(value = sum(value)), by = c("region", "period", "subsectorL3", "unit")]
+      setnames(summationCheck, "value", "check")
+      summationCheck <- merge(summationCheck, energyServiceDemandJRC, by = c("region", "period", "subsectorL3", "unit"))
+      summationCheck[, test := abs(value - check)]
+      if (sum(summationCheck$test) > 0.001) stop("Detailed JRC technology data does not match reporting for aggregated transport modes")
+      energyServiceDemandJRCTech[subsectorL3 == "trn_pass_road_LDV_4W", variable := paste0("ES|Transport|Pass|Road|LDV|Four Wheelers|", technology)]
+      energyServiceDemandJRCTech[subsectorL3 == "Bus_tmp_subsector_L3", variable := paste0("ES|Transport|Pass|Road|Bus|", technology)]
 
-
-
-
-      quitteobj <- historicalEnergyServiceDemand
+      energyServiceDemand <- rbind(energyServiceDemandJRC[, c("subsectorL3") := NULL], energyServiceDemandJRCTech[, c("subsectorL3", "technology") := NULL])
+      setcolorder(energyServiceDemand, c("region", "period", "variable", "unit", "value"))
+      quitteobj <- energyServiceDemand
     },
     "vehicleStock" = {
       unit <- "million veh"
@@ -138,8 +144,10 @@ calcAdditionalTransportSources <- function(subtype, FiveYearAverage = TRUE) { # 
     setnames(quitteobj, "avg5ycentered", "value")
   }
 
-
+  browser()
+  quitteobj
   x <- as.magpie(as.data.frame(quitteobj))
+  x <- suppressMessages(toolCountryFill(x, fill = NA))
 
   return(list(
     x           = x,

@@ -20,22 +20,15 @@ toolPrepareJRC <- function(x, subtype = c("energyServiceDemand", "energyServiceD
     dt <- magpie2dt(x)
     dt <- merge.data.table(dt, mapping, all.x = TRUE, allow.cartesian = TRUE, by = "JRCtransportMode")
     dt <- dt[, .(value = sum(value)), c("region", "period", "subsectorL3", "variable", "unit")]
-    setcolorder(dt, c("region", "period", "subsectorL3", "technology", "variable", "unit"))
+    setcolorder(dt, c("region", "period", "subsectorL3", "variable", "unit"))
   } else if (subtype == "energyServiceDemandTechnologyLevel") {
     mappingModes <- fread(system.file("extdata", "mappingJRCtoEDGET.csv", package = "mrtransport", mustWork = TRUE))
-    mappingTechnologies <- fread(system.file("extdata", "mappingJRCtoEDGET.csv", package = "mrtransport", mustWork = TRUE))
+    mappingTechnologies <- fread(system.file("extdata", "mappingTechJRCtoEDGET.csv", package = "mrtransport", mustWork = TRUE))
     dt <- magpie2dt(x)
     dt <- merge.data.table(dt, mappingModes, all.x = TRUE, allow.cartesian = TRUE, by = "JRCtransportMode")
     dt <- merge.data.table(dt, mappingTechnologies, all.x = TRUE, allow.cartesian = TRUE, by = "JRCtechnology")
-  }
-
-
-
-
-
-
-  if (anyNA(dt) == TRUE) {
-    stop("Eurostat data contains NAs")
+    dt <- dt[, .(value = sum(value)), c("region", "period", "subsectorL3", "technology", "variable", "unit")]
+    setcolorder(dt, c("region", "period", "subsectorL3", "technology", "variable", "unit"))
   }
   return(dt)
 }

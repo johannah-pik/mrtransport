@@ -14,7 +14,7 @@
 #' @importFrom magclass as.magpie
 #' @importFrom readxl read_excel
 
-readJRC <- function(subtype = c("feDemand", "LDVfleet")) {
+readJRC <- function(subtype = c("energyServiceDemand", "energyServiceDemandTechnologyLevel")) {
   Eurostatsector <- variable <- region <- NULL
 
   countries <- c(
@@ -61,27 +61,24 @@ readJRC <- function(subtype = c("feDemand", "LDVfleet")) {
         function(x) {
           output <- suppressMessages(data.table(read_excel(
             path = file.path(x, paste0("JRC-IDEES-2023_Transport", "_", x, ".xlsx")),
-            sheet = "TrRoad_act", "A1:Y25"
+            sheet = "TrRoad_act", "A1:Y18"
           )))
           output <- output[-c(1:4)]
-          output <- output[c(1:13), unit := "million pkm"]
-          output <- output[c(14:20), unit := "million tkm"]
+          output <- output[, unit := "million pkm"]
           setnames(output, 1, "JRCtechnology")
           output <- output[c(2:7), JRCtransportMode := "Passenger cars"]
           output <- output[c(9:13), JRCtransportMode := "Motor coaches, buses and trolley buses"]
-          output <- output[c(15:20), JRCtransportMode := "Light commercial vehicles"]
           # Delete totals
-          totals <- c("Passenger cars", "Road transport", "Motor coaches, buses and trolley buses", "Freight transport (mio tkm)",
-                      "Light commercial vehicles")
-          output <- output[!technology %in% totals]
-          output <- melt(output, id.vars = c("JRCtransportMode", "technology", "unit"), variable.name = "period")
+          totals <- c("Passenger cars", "Road transport", "Motor coaches, buses and trolley buses")
+          output <- output[!JRCtechnology %in% totals]
+          output <- melt(output, id.vars = c("JRCtransportMode", "JRCtechnology", "unit"), variable.name = "period")
           output[, region := x]
           return(output)
         }
       ))
       # Bring to quitte column order
       dt[, variable := "Energy service demand"]
-      dt <- dt[, c("region", "JRCtransportMode", "technology", "variable", "unit", "period", "value")]
+      dt <- dt[, c("region", "JRCtransportMode", "JRCtechnology", "variable", "unit", "period", "value")]
       x <- as.magpie(as.data.frame(dt), spatial = "region", temporal = "period")
       return(x)
     }
