@@ -27,6 +27,11 @@ toolPrepareGCAM <- function(x, subtype) {
   mappingGCAM <- mappingGCAMraw[rep(seq_len(.N), times = length(regions))]
   mappingGCAM[, region := rep(regions, each = nrow(mappingGCAMraw))]
   mappingGCAM[region == "IND" & GCAMsubsector == "Three-Wheeler", univocalName := "Rickshaw"]
+  # European countries use the TRACCS car classes: Mini Car is part of Subcompact Car (TRACCS Small),
+  # Van is part of Large Car and SUV (TRACCS Executive)
+  europeanCountries <- toolEuropeanCountries()
+  mappingGCAM[region %in% europeanCountries & univocalName == "Mini Car", univocalName := "Subcompact Car"]
+  mappingGCAM[region %in% europeanCountries & univocalName == "Van", univocalName := "Large Car and SUV"]
 
   switch(
     subtype,

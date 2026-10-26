@@ -46,6 +46,14 @@ toolPrepareUCD <- function(x, subtype) {
   weight[is.na(fe), fe := 1]
 
   dt <- magpie2dt(x)
+  # European countries use the TRACCS car classes: Mini Car is part of Subcompact Car (TRACCS Small),
+  # Van is part of Large Car and SUV (TRACCS Executive)
+  mappingUCD <- mappingUCD[rep(seq_len(.N), times = length(unique(dt$region)))]
+  mappingUCD[, region := rep(unique(dt$region), each = nrow(mappingUCDraw))]
+  europeanCountries <- toolEuropeanCountries()
+  mappingUCD[region %in% europeanCountries & univocalName == "Mini Car", univocalName := "Subcompact Car"]
+  mappingUCD[region %in% europeanCountries & univocalName == "Van", univocalName := "Large Car and SUV"]
+  setkey(mappingUCD, region, UCD_sector, mode, size_class, UCD_technology, UCD_fuel)
   setkey(dt, region, UCD_sector, mode, size_class, UCD_technology, UCD_fuel, period)
   setkey(weight, region, UCD_sector, mode, size_class, UCD_technology, UCD_fuel)
   if (subtype %in% c("energyIntensity", "loadFactor", "CAPEX", "nonFuelOPEX",

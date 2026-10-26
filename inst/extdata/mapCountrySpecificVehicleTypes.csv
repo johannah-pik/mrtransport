@@ -111,7 +111,7 @@ ALA;International Ship;1
 ALA;Large Car;0
 ALA;Large Car and SUV;1
 ALA;Midsize Car;0
-ALA;Mini Car;1
+ALA;Mini Car;0
 ALA;Moped;1
 ALA;Motorcycle (50-250cc);1
 ALA;Motorcycle (>250cc);1
@@ -122,7 +122,7 @@ ALA;Truck (18t);1
 ALA;Truck (26t);1
 ALA;Truck (40t);1
 ALA;Truck (7_5t);1
-ALA;Van;1
+ALA;Van;0
 ALA;Walk;1
 ALB;Bus;1
 ALB;Compact Car;1
@@ -147,7 +147,7 @@ ALB;Truck (18t);1
 ALB;Truck (26t);1
 ALB;Truck (40t);1
 ALB;Truck (7_5t);1
-ALB;Van;1
+ALB;Van;0
 ALB;Walk;1
 AND;Bus;1
 AND;Compact Car;1
@@ -161,7 +161,7 @@ AND;International Ship;1
 AND;Large Car;0
 AND;Large Car and SUV;1
 AND;Midsize Car;0
-AND;Mini Car;1
+AND;Mini Car;0
 AND;Moped;1
 AND;Motorcycle (50-250cc);1
 AND;Motorcycle (>250cc);1
@@ -172,7 +172,7 @@ AND;Truck (18t);1
 AND;Truck (26t);1
 AND;Truck (40t);1
 AND;Truck (7_5t);1
-AND;Van;1
+AND;Van;0
 AND;Walk;1
 ARE;Bus;1
 ARE;Compact Car;1
@@ -672,7 +672,7 @@ BIH;Truck (18t);1
 BIH;Truck (26t);1
 BIH;Truck (40t);1
 BIH;Truck (7_5t);1
-BIH;Van;1
+BIH;Van;0
 BIH;Walk;1
 BLM;Bus;1
 BLM;Compact Car;1
@@ -1911,7 +1911,7 @@ FRO;International Ship;1
 FRO;Large Car;0
 FRO;Large Car and SUV;1
 FRO;Midsize Car;0
-FRO;Mini Car;1
+FRO;Mini Car;0
 FRO;Moped;1
 FRO;Motorcycle (50-250cc);1
 FRO;Motorcycle (>250cc);1
@@ -1922,7 +1922,7 @@ FRO;Truck (18t);1
 FRO;Truck (26t);1
 FRO;Truck (40t);1
 FRO;Truck (7_5t);1
-FRO;Van;1
+FRO;Van;0
 FRO;Walk;1
 FSM;Bus;1
 FSM;Compact Car;1
@@ -2036,7 +2036,7 @@ GGY;International Ship;1
 GGY;Large Car;0
 GGY;Large Car and SUV;1
 GGY;Midsize Car;0
-GGY;Mini Car;1
+GGY;Mini Car;0
 GGY;Moped;1
 GGY;Motorcycle (50-250cc);1
 GGY;Motorcycle (>250cc);1
@@ -2047,7 +2047,7 @@ GGY;Truck (18t);1
 GGY;Truck (26t);1
 GGY;Truck (40t);1
 GGY;Truck (7_5t);1
-GGY;Van;1
+GGY;Van;0
 GGY;Walk;1
 GHA;Bus;1
 GHA;Compact Car;1
@@ -2086,7 +2086,7 @@ GIB;International Ship;1
 GIB;Large Car;0
 GIB;Large Car and SUV;1
 GIB;Midsize Car;0
-GIB;Mini Car;1
+GIB;Mini Car;0
 GIB;Moped;1
 GIB;Motorcycle (50-250cc);1
 GIB;Motorcycle (>250cc);1
@@ -2097,7 +2097,7 @@ GIB;Truck (18t);1
 GIB;Truck (26t);1
 GIB;Truck (40t);1
 GIB;Truck (7_5t);1
-GIB;Van;1
+GIB;Van;0
 GIB;Walk;1
 GIN;Bus;1
 GIN;Compact Car;1
@@ -2286,7 +2286,7 @@ GRL;International Ship;1
 GRL;Large Car;0
 GRL;Large Car and SUV;1
 GRL;Midsize Car;0
-GRL;Mini Car;1
+GRL;Mini Car;0
 GRL;Moped;1
 GRL;Motorcycle (50-250cc);1
 GRL;Motorcycle (>250cc);1
@@ -2297,7 +2297,7 @@ GRL;Truck (18t);1
 GRL;Truck (26t);1
 GRL;Truck (40t);1
 GRL;Truck (7_5t);1
-GRL;Van;1
+GRL;Van;0
 GRL;Walk;1
 GTM;Bus;1
 GTM;Compact Car;1
@@ -2586,7 +2586,7 @@ IMN;International Ship;1
 IMN;Large Car;0
 IMN;Large Car and SUV;1
 IMN;Midsize Car;0
-IMN;Mini Car;1
+IMN;Mini Car;0
 IMN;Moped;1
 IMN;Motorcycle (50-250cc);1
 IMN;Motorcycle (>250cc);1
@@ -2597,7 +2597,7 @@ IMN;Truck (18t);1
 IMN;Truck (26t);1
 IMN;Truck (40t);1
 IMN;Truck (7_5t);1
-IMN;Van;1
+IMN;Van;0
 IMN;Walk;1
 IND;Bus;1
 IND;Compact Car;1
@@ -2837,7 +2837,7 @@ JEY;International Ship;1
 JEY;Large Car;0
 JEY;Large Car and SUV;1
 JEY;Midsize Car;0
-JEY;Mini Car;1
+JEY;Mini Car;0
 JEY;Moped;1
 JEY;Motorcycle (50-250cc);1
 JEY;Motorcycle (>250cc);1
@@ -2848,7 +2848,7 @@ JEY;Truck (18t);1
 JEY;Truck (26t);1
 JEY;Truck (40t);1
 JEY;Truck (7_5t);1
-JEY;Van;1
+JEY;Van;0
 JEY;Walk;1
 JOR;Bus;1
 JOR;Compact Car;1
@@ -3248,7 +3248,7 @@ LIE;Truck (18t);1
 LIE;Truck (26t);1
 LIE;Truck (40t);1
 LIE;Truck (7_5t);1
-LIE;Van;1
+LIE;Van;0
 LIE;Walk;1
 LKA;Bus;1
 LKA;Compact Car;1
@@ -3462,7 +3462,7 @@ MCO;International Ship;1
 MCO;Large Car;0
 MCO;Large Car and SUV;1
 MCO;Midsize Car;0
-MCO;Mini Car;1
+MCO;Mini Car;0
 MCO;Moped;1
 MCO;Motorcycle (50-250cc);1
 MCO;Motorcycle (>250cc);1
@@ -3473,7 +3473,7 @@ MCO;Truck (18t);1
 MCO;Truck (26t);1
 MCO;Truck (40t);1
 MCO;Truck (7_5t);1
-MCO;Van;1
+MCO;Van;0
 MCO;Walk;1
 MDA;Bus;1
 MDA;Compact Car;1
@@ -3723,7 +3723,7 @@ MNE;Truck (18t);1
 MNE;Truck (26t);1
 MNE;Truck (40t);1
 MNE;Truck (7_5t);1
-MNE;Van;1
+MNE;Van;0
 MNE;Walk;1
 MNG;Bus;1
 MNG;Compact Car;1
@@ -4948,7 +4948,7 @@ SJM;Truck (18t);1
 SJM;Truck (26t);1
 SJM;Truck (40t);1
 SJM;Truck (7_5t);1
-SJM;Van;1
+SJM;Van;0
 SJM;Walk;1
 SLB;Bus;1
 SLB;Compact Car;1
@@ -5037,7 +5037,7 @@ SMR;International Ship;1
 SMR;Large Car;0
 SMR;Large Car and SUV;1
 SMR;Midsize Car;0
-SMR;Mini Car;1
+SMR;Mini Car;0
 SMR;Moped;1
 SMR;Motorcycle (50-250cc);1
 SMR;Motorcycle (>250cc);1
@@ -5048,7 +5048,7 @@ SMR;Truck (18t);1
 SMR;Truck (26t);1
 SMR;Truck (40t);1
 SMR;Truck (7_5t);1
-SMR;Van;1
+SMR;Van;0
 SMR;Walk;1
 SOM;Bus;1
 SOM;Compact Car;1
@@ -5123,7 +5123,7 @@ SRB;Truck (18t);1
 SRB;Truck (26t);1
 SRB;Truck (40t);1
 SRB;Truck (7_5t);1
-SRB;Van;1
+SRB;Van;0
 SRB;Walk;1
 SSD;Bus;1
 SSD;Compact Car;1
@@ -5912,7 +5912,7 @@ VAT;International Ship;1
 VAT;Large Car;0
 VAT;Large Car and SUV;1
 VAT;Midsize Car;0
-VAT;Mini Car;1
+VAT;Mini Car;0
 VAT;Moped;1
 VAT;Motorcycle (50-250cc);1
 VAT;Motorcycle (>250cc);1
@@ -5923,7 +5923,7 @@ VAT;Truck (18t);1
 VAT;Truck (26t);1
 VAT;Truck (40t);1
 VAT;Truck (7_5t);1
-VAT;Van;1
+VAT;Van;0
 VAT;Walk;1
 VCT;Bus;1
 VCT;Compact Car;1
